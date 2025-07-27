@@ -6,6 +6,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.dragonsofmugloar.adventure.client.GameApi;
+import com.dragonsofmugloar.adventure.client.GameApiClient;
+import com.dragonsofmugloar.adventure.service.GameService;
+
+
 @SpringBootApplication
 public class AdventureApplication implements CommandLineRunner {
 
@@ -19,8 +24,13 @@ public class AdventureApplication implements CommandLineRunner {
 
         try (Scanner scanner = new Scanner(System.in)) {
 			if (scanner.hasNextInt()) {
-                int numberOfDragons = scanner.nextInt();
-                System.out.println("You have chosen to play " + numberOfDragons + " games today!");
+                int numberOfGames = scanner.nextInt();
+                System.out.println("You have chosen to play " + numberOfGames + " games today!");
+
+                GameApi gameApiClient = new GameApiClient();
+                GameService gameService = new GameService(gameApiClient);
+
+                gameService.startGames(numberOfGames);
             } else {
                 System.out.println("Invalid input. Please enter a number.");
             }
