@@ -47,4 +47,15 @@ public class PurchaseResponse {
     public void setTurn(int turn) {
         this.turn = turn;
     }
+
+    @Override
+    public String toString() {
+        return "PurchaseResponse{" +
+                "shoppingSuccess=" + shoppingSuccess +
+                ", gold=" + gold +
+                ", lives=" + lives +
+                ", level=" + level +
+                ", turn=" + turn +
+                '}';
+    }
 }

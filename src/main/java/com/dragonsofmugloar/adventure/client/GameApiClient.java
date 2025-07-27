@@ -30,32 +30,32 @@ public class GameApiClient implements GameApi {
 
     @Override
     public ArrayList<TaskResponse> getTasks(String gameId) {
-        String urlStr = Constants.GAME_BASE_URL + gameId + "/messages";
+        String urlStr = Constants.GAME_BASE_URL + "/" + gameId + "/messages";
         TaskResponse[] tasks = makeRequest(urlStr, "GET", TaskResponse[].class, "Failed to get tasks");
         return new ArrayList<>(Arrays.asList(tasks));
     }
 
     @Override
     public TaskAttemptResponse attemptTask(String gameId, String taskId) {
-        String urlStr = Constants.GAME_BASE_URL + gameId + "/solve/" + taskId;
+        String urlStr = Constants.GAME_BASE_URL + "/" + gameId + "/solve/" + taskId;
         return makeRequest(urlStr, "POST", TaskAttemptResponse.class, "Failed to attempt task");
     }
 
     @Override
     public PurchaseResponse makePurchase(String gameId, String itemId) {
-        String urlStr = Constants.GAME_BASE_URL + "/shop/buy/" + itemId;
+        String urlStr = Constants.GAME_BASE_URL + "/" + gameId + "/shop/buy/" + itemId;
         return makeRequest(urlStr, "POST", PurchaseResponse.class, "Failed to make purchase");
     }
 
     @Override
     public ReputationResponse checkReputation(String gameId) {
-        String urlStr = Constants.GAME_BASE_URL + gameId + "/investigate/reputation";
+        String urlStr = Constants.GAME_BASE_URL + "/" + gameId + "/investigate/reputation";
         return makeRequest(urlStr, "GET", ReputationResponse.class, "Failed to check reputation");
     }
 
     @Override
     public AvailableItemResponse[] getAvailableItems(String gameId) {
-        String urlStr = Constants.GAME_BASE_URL + gameId + "/shop";
+        String urlStr = Constants.GAME_BASE_URL + "/" + gameId + "/shop";
         return makeRequest(urlStr, "GET", AvailableItemResponse[].class, "Failed to get available items");
     }
 

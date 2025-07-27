@@ -65,4 +65,17 @@ public class StartResponse {
     public void setTurn(int turn) {
         this.turn = turn;
     }
+
+    @Override
+    public String toString() {
+        return "StartResponse{" +
+                "gameId='" + gameId + '\'' +
+                ", lives=" + lives +
+                ", gold=" + gold +
+                ", level=" + level +
+                ", score=" + score +
+                ", highScore=" + highScore +
+                ", turn=" + turn +
+                '}';
+    }
 }

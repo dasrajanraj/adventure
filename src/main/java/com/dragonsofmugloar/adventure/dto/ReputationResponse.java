@@ -29,4 +29,13 @@ public class ReputationResponse {
     public void setUnderworld(int underworld) {
         this.underworld = underworld;
     }
+
+    @Override
+    public String toString() {
+        return "ReputationResponse{" +
+                "people=" + people +
+                ", state=" + state +
+                ", underworld=" + underworld +
+                '}';
+    }
 }

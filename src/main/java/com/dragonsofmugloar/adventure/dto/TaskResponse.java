@@ -40,8 +40,8 @@ public class TaskResponse {
         this.expiresIn = expiresIn;
     }
 
-    public String getEncrypted() {
-        return encrypted;
+    public boolean  isEncrypted() {
+        return encrypted != null && encrypted.equals("1");
     }
 
     public void setEncrypted(String encrypted) {
@@ -54,5 +54,17 @@ public class TaskResponse {
 
     public void setProbability(String probability) {
         this.probability = probability;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskResponse{" +
+                "adId='" + adId + '\'' +
+                ", message='" + message + '\'' +
+                ", reward=" + reward +
+                ", expiresIn=" + expiresIn +
+                ", encrypted='" + encrypted + '\'' +
+                ", probability='" + probability + '\'' +
+                '}';
     }
 }

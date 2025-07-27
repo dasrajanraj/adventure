@@ -64,5 +64,18 @@ public class TaskAttemptResponse {
 
     public void setMessage(String message) {
         this.message = message;
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return "TaskAttemptResponse{" +
+                "success=" + success +
+                ", lives=" + lives +
+                ", gold=" + gold +
+                ", score=" + score +
+                ", highScore=" + highScore +
+                ", turn=" + turn +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }
