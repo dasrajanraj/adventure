@@ -40,8 +40,8 @@ public class TaskResponse {
         this.expiresIn = expiresIn;
     }
 
-    public boolean  isEncrypted() {
-        return encrypted != null && encrypted.equals("1");
+    public String getEncrypted() {
+        return encrypted;
     }
 
     public void setEncrypted(String encrypted) {

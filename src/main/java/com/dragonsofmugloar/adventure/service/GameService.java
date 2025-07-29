@@ -1,16 +1,23 @@
 package com.dragonsofmugloar.adventure.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.dragonsofmugloar.adventure.client.GameApi;
 import com.dragonsofmugloar.adventure.dto.StartResponse;
 import com.dragonsofmugloar.adventure.dto.TaskAttemptResponse;
 import com.dragonsofmugloar.adventure.dto.TaskResponse;
 import com.dragonsofmugloar.adventure.model.Game;
+import com.dragonsofmugloar.adventure.util.Stats;
+import com.dragonsofmugloar.adventure.util.TaskDecoder;
 
 public class GameService {
     private final GameApi gameApiClient;
+
+    // Temporary declaration for probability stats
+    Map<String, Stats> probabilityStats = new java.util.HashMap<>() {{}};
 
     public GameService( GameApi gameApiClient) {
         this.gameApiClient = gameApiClient;
@@ -52,7 +59,7 @@ public class GameService {
 
     private void playGames(ArrayList<Game> games) {
         var count = 0;
-        
+
         for (Game game : games) {
             System.out.println("Playing game with ID: " + game.getGameId());
             playGame(game);
@@ -61,6 +68,7 @@ public class GameService {
             }
             System.out.println("Game with ID: " + game.getGameId() + " ended. Score: " + game.getScore() + ", Lives left: " + game.getLives());
         }
+
         System.out.println("Total games won: " + count + " out of " + games.size());
     }
 
@@ -92,6 +100,10 @@ public class GameService {
                     continue;   
                 }
 
+                probabilityStats
+                    .computeIfAbsent(task.getProbability(), p -> new Stats(0,0))
+                    .record(result.isSuccess());
+
                 if (result.isSuccess()) {
                     game.setScore(result.getScore());
                 } else{
@@ -102,11 +114,48 @@ public class GameService {
     }
 
     private TaskResponse taskToSolve(List<TaskResponse> tasks) {
-        TaskResponse task = tasks.get(0);
-        return task;
+        return tasks.stream()
+                .map(task -> {
+                    if (task.getEncrypted() != null) {
+                        return TaskDecoder.decodeTaskResponse(task);
+                    }
+
+                    return task;
+                })
+                .sorted(Comparator
+                        .comparing(this::probabilityRank)
+                        .thenComparing(TaskResponse::getReward, Comparator.reverseOrder()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private int probabilityRank(TaskResponse task) {
+        return switch (task.getProbability().toLowerCase()) {
+            case "piece of cake" -> 1;
+            case "walk in the park" -> 2;
+            case "sure thing" -> 3;
+            case "quite likely" -> 4;
+            case "rather detrimental" -> 5;
+            case "hmmm...." -> 6;
+            case "U3VpY2lkZSBtaXNzaW9u" -> 7;
+            case "playing with fire" -> 8;
+            case "risky" -> 9;
+            case "gamble" -> 10;
+            case "suicide mission" -> 11;
+            case "impossible" -> 12;
+            default -> {
+                System.out.println(task.toString());
+                yield 12;
+            }
+        };
     }
 
     private void endGame() {
         System.out.println("Ending the game. Thank you for playing!");
+
+        System.out.println("\n=== Probability Performance Stats ===");
+        for (var entry : probabilityStats.entrySet()) {
+            System.out.println(entry.getKey() + " => " + entry.getValue());
+        }
     }
 }
