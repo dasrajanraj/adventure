@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dragonsofmugloar.adventure.client.GameApi;
 import com.dragonsofmugloar.adventure.dto.StartResponse;
@@ -14,6 +16,8 @@ import com.dragonsofmugloar.adventure.util.Stats;
 import com.dragonsofmugloar.adventure.util.TaskDecoder;
 
 public class GameService {
+    private static final Logger log = LogManager.getLogger(GameService.class);
+
     private final GameApi gameApiClient;
 
     // Temporary declaration for probability stats
@@ -27,7 +31,7 @@ public class GameService {
         ArrayList<Game> games = initializeGames(numOfGames);
 
         if (games.size() != numOfGames) {
-            System.out.println("Only " + games.size() + " out of " + numOfGames + " games started by server.");
+            log.warn("Only " + games.size() + " out of " + numOfGames + " games started by server.");
         }
 
         playGames(games);
@@ -43,7 +47,7 @@ public class GameService {
             try {
                 startResponse = gameApiClient.startGame();
             } catch (Exception e) {
-                System.out.println("Error starting game " + (i + 1) + ": " + e.getMessage());
+                log.error("Error starting game " + (i + 1) + ": " + e.getMessage());
                 continue;
             }
 
@@ -61,15 +65,15 @@ public class GameService {
         var count = 0;
 
         for (Game game : games) {
-            System.out.println("Playing game with ID: " + game.getGameId());
+            log.info("Starting game with ID: " + game.getGameId());
             playGame(game);
             if (game.getScore() >= 1000) {
                 count++;
             }
-            System.out.println("Game with ID: " + game.getGameId() + " ended. Score: " + game.getScore() + ", Lives left: " + game.getLives());
+            log.info("Game with ID: " + game.getGameId() + " ended. Score: " + game.getScore() + ", Lives left: " + game.getLives());
         }
 
-        System.out.println("Total games won: " + count + " out of " + games.size());
+        log.info("Total games won: " + count + " out of " + games.size());
     }
 
     private void playGame(Game game) {
@@ -79,24 +83,24 @@ public class GameService {
             try {
                 tasks = gameApiClient.getTasks(game.getGameId());
             } catch (Exception e) {
-                System.out.println("Error fetching tasks for game " + game.getGameId() + ": " + e.getMessage());
+                log.error("Error fetching tasks for game " + game.getGameId() + ": " + e.getMessage());
                 break;
             }
 
             if (tasks.isEmpty()) {
-                System.out.println("No tasks available for game with ID: " + game.getGameId());
+                log.error("No tasks available for game with ID: " + game.getGameId());
                 break;
             }
 
             TaskResponse task = taskToSolve(tasks);
-            System.out.println("Selected task: " + (task != null ? task.getAdId() : "None"));
+            log.info("Selected task: " + (task != null ? task.getAdId() : "None"));
 
             if (task != null) {
                 TaskAttemptResponse result;
                 try {
                     result = this.gameApiClient.attemptTask(game.getGameId(), task.getAdId());                    
                 } catch (Exception e) {
-                    System.out.println("Error attempting task " + task.getAdId() + " for game " + game.getGameId() + ": " + e.getMessage());
+                    log.error("Error attempting task " + task.getAdId() + " for game " + game.getGameId() + ": " + e.getMessage());
                     continue;   
                 }
 
@@ -137,25 +141,24 @@ public class GameService {
             case "quite likely" -> 4;
             case "rather detrimental" -> 5;
             case "hmmm...." -> 6;
-            case "U3VpY2lkZSBtaXNzaW9u" -> 7;
-            case "playing with fire" -> 8;
-            case "risky" -> 9;
-            case "gamble" -> 10;
-            case "suicide mission" -> 11;
-            case "impossible" -> 12;
+            case "playing with fire" -> 7;
+            case "risky" -> 8;
+            case "gamble" -> 9;
+            case "suicide mission" -> 10;
+            case "impossible" -> 11;
             default -> {
-                System.out.println(task.toString());
+                log.warn(task.toString());
                 yield 12;
             }
         };
     }
 
     private void endGame() {
-        System.out.println("Ending the game. Thank you for playing!");
+        log.info("Ending the game. Thank you for playing!");
 
-        System.out.println("\n=== Probability Performance Stats ===");
+        log.info("\n=== Probability Performance Stats ===");
         for (var entry : probabilityStats.entrySet()) {
-            System.out.println(entry.getKey() + " => " + entry.getValue());
+            log.info(entry.getKey() + " => " + entry.getValue());
         }
     }
 }

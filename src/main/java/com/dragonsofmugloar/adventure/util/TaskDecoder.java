@@ -1,9 +1,13 @@
 package com.dragonsofmugloar.adventure.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.dragonsofmugloar.adventure.dto.TaskResponse;
 
 public class TaskDecoder {
-    
+    private static final Logger log = LogManager.getLogger(TaskDecoder.class);
+
     public static TaskResponse decodeTaskResponse(TaskResponse taskResponse) {
         String encryption = taskResponse.getEncrypted();
 
@@ -18,7 +22,7 @@ public class TaskDecoder {
                 taskResponse.setAdId(Decoder.decodeRot13(taskResponse.getAdId()));
                 taskResponse.setMessage(Decoder.decodeRot13(taskResponse.getMessage()));
             default:
-                System.out.println("Unknown encryption type: " + encryption);
+                log.warn("Unknown encryption type: " + encryption);
         }
 
         return taskResponse;
