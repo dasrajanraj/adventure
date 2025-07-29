@@ -21,6 +21,7 @@ public class TaskDecoder {
                 taskResponse.setProbability(Decoder.decodeRot13(taskResponse.getProbability()));
                 taskResponse.setAdId(Decoder.decodeRot13(taskResponse.getAdId()));
                 taskResponse.setMessage(Decoder.decodeRot13(taskResponse.getMessage()));
+                break;
             default:
                 log.warn("Unknown encryption type: " + encryption);
         }

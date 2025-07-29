@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,14 +52,23 @@ public class GameService {
                 continue;
             }
 
-            Game game = new Game(
-                startResponse.getGameId(), 
-                startResponse.getScore(), 
-                startResponse.getLives()
-            );
+            var game = initializeGame(startResponse);
+
             games.add(game);
         }
         return games;
+    }
+
+    private Game initializeGame(StartResponse startResponse) {
+        Game game = new Game(startResponse.getGameId());
+
+        game.setLives(startResponse.getLives());
+        game.setScore(startResponse.getScore());
+        game.setGold(startResponse.getGold());
+        game.setHighScore(startResponse.getHighScore());
+        game.setTurn(startResponse.getTurn());
+
+        return game;
     }
 
     private void playGames(ArrayList<Game> games) {
@@ -93,26 +103,68 @@ public class GameService {
             }
 
             TaskResponse task = taskToSolve(tasks);
-            log.info("Selected task: " + (task != null ? task.getAdId() : "None"));
+            if (task == null) {
+                log.error("No suitable task found for game with ID: " + game.getGameId());
+                break;
+            }
 
-            if (task != null) {
-                TaskAttemptResponse result;
-                try {
-                    result = this.gameApiClient.attemptTask(game.getGameId(), task.getAdId());                    
-                } catch (Exception e) {
-                    log.error("Error attempting task " + task.getAdId() + " for game " + game.getGameId() + ": " + e.getMessage());
-                    continue;   
+            TaskAttemptResponse result;
+            try {
+                result = this.gameApiClient.attemptTask(game.getGameId(), task.getAdId());                    
+            } catch (Exception e) {
+                log.error("Error attempting task " + task.getAdId() + " for game " + game.getGameId() + ": " + e.getMessage());
+                continue;   
+            }
+
+            probabilityStats
+                .computeIfAbsent(task.getProbability(), p -> new Stats(0,0))
+                .record(result.isSuccess());
+
+            log.info("Task attempt result: " + (result.isSuccess() ? "Success" : "Failure") + 
+                        ", Score: " + result.getScore() + 
+                        ", Lives left: " + result.getLives() + 
+                        ", Gold: " + result.getGold() + 
+                        ", High Score: " + result.getHighScore() + 
+                        ", Turn: " + result.getTurn() +
+                        ", Message: " + result.getMessage() +
+                        ", task: " + task.toString());
+            updateGameState(game, result);
+            buyItemsIfNeeded(game);
+        }
+    }
+
+    private void updateGameState(Game game, TaskAttemptResponse result) {
+        game.setScore(result.getScore());
+        game.setLives(result.getLives());
+        game.setGold(result.getGold());
+        game.setHighScore(result.getHighScore());
+        game.setTurn(result.getTurn());
+
+        String message = result.getMessage();
+        if (message != null && !message.isEmpty()) {
+            game.appendMessage(message);
+        }
+    }
+
+    private void buyItemsIfNeeded(Game game) {
+        if (game.getGold() >= 100 && game.getLives() < 3) {
+            try {
+                var buyResponse = gameApiClient.getAvailableItems(game.getGameId());
+                if (buyResponse.length == 0) {
+                    log.info("No items available for purchase in game " + game.getGameId());
+                    return;
                 }
 
-                probabilityStats
-                    .computeIfAbsent(task.getProbability(), p -> new Stats(0,0))
-                    .record(result.isSuccess());
-
-                if (result.isSuccess()) {
-                    game.setScore(result.getScore());
-                } else{
-                    game.setLives(result.getLives());
+                // buy item with id "hpot" if available
+                if (java.util.Arrays.stream(buyResponse).noneMatch(item -> "hpot".equals(item.getId()))) {
+                    log.info("No health potion available for purchase in game " + game.getGameId());
+                    return;
                 }
+
+                gameApiClient.makePurchase(game.getGameId(), "hpot");
+
+            } catch (Exception e) {
+                log.error("Error buying item for game " + game.getGameId() + ": " + e.getMessage());
             }
         }
     }
@@ -126,6 +178,7 @@ public class GameService {
 
                     return task;
                 })
+                .filter(task -> !task.getMessage().startsWith("Steal super awesome diamond"))
                 .sorted(Comparator
                         .comparing(this::probabilityRank)
                         .thenComparing(TaskResponse::getReward, Comparator.reverseOrder()))
