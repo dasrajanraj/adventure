@@ -1,6 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class TaskResponse {
+
     private String adId;
     private String message;
     private int reward;

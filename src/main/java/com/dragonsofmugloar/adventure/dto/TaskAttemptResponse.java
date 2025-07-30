@@ -1,7 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class TaskAttemptResponse {
-    
+
     private boolean success;
     private int lives;
     private int gold;

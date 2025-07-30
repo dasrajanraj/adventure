@@ -1,6 +1,7 @@
 package com.dragonsofmugloar.adventure.util;
 
 public class Stats {
+
     int tried = 0;
     int success = 0;
 

@@ -1,7 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class AvailableItemResponse {
-    
+
     private String id;
     private String name;
     private int cost;

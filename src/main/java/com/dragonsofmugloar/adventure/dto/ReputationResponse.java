@@ -1,7 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class ReputationResponse {
-    
+
     private int people;
     private int state;
     private int underworld;

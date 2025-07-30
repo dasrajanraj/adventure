@@ -1,7 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class StartResponse {
-    
+
     private String gameId;
     private int lives;
     private int gold;

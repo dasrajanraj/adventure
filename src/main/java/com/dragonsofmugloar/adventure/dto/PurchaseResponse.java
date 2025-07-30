@@ -1,7 +1,7 @@
 package com.dragonsofmugloar.adventure.dto;
 
 public class PurchaseResponse {
-    
+
     private boolean shoppingSuccess;
     private int gold;
     private int lives;

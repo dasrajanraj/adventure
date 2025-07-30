@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.dragonsofmugloar.adventure.dto.TaskResponse;
 
 public class TaskDecoder {
+
     private static final Logger log = LogManager.getLogger(TaskDecoder.class);
 
     public static TaskResponse decodeTaskResponse(TaskResponse taskResponse) {
