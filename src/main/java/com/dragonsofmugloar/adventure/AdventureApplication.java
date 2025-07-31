@@ -1,7 +1,5 @@
 package com.dragonsofmugloar.adventure;
 
-import java.util.Scanner;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -24,23 +22,33 @@ public class AdventureApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("How many Dragon of Mugloar games do you want to start?");
+        int numberOfGames = getNumberOfGames(args);
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            if (scanner.hasNextInt()) {
-                int numberOfGames = scanner.nextInt();
-
-                GameApi gameApiClient = new GameApiClient();
-                GameService gameService = new GameService(gameApiClient);
-
-                gameService.startGames(numberOfGames);
-            } else {
-                log.error("Invalid input. Please enter a number.");
-            }
-        } catch (Exception e) {
-            log.error("An error occurred while starting the game: " + e.getMessage(), e);
-        } finally {
-            log.info("Thank you for playing! Goodbye!");
+        if (numberOfGames <= 0) {
+            log.error("Invalid number of games. Exiting.");
+            return;
         }
+
+        try {            
+            GameApi gameApi = new GameApiClient();
+            GameService gameService = new GameService(gameApi);
+            gameService.startGames(numberOfGames);
+        } catch (Exception e) {
+            log.error("An error occurred while starting games: {}", e.getMessage(), e);
+        }
+
+        log.info("Thank you for playing! Goodbye!");
+    }
+
+    private int getNumberOfGames(String[] args) {
+        if (args.length > 0) {
+            try {
+                return Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid number format in arguments: {}", args[0]);
+            }
+        }
+
+        return -1;
     }
 }
