@@ -9,6 +9,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.dragonsofmugloar.adventure.constants.Constants;
 import com.dragonsofmugloar.adventure.dto.AvailableItemResponse;
 import com.dragonsofmugloar.adventure.dto.PurchaseResponse;
@@ -19,6 +22,8 @@ import com.dragonsofmugloar.adventure.dto.TaskResponse;
 import com.google.gson.Gson;
 
 public class GameApiClient implements GameApi {
+
+    private static final Logger log = LogManager.getLogger(GameApiClient.class);
 
     private final Gson gson = new Gson();
 
@@ -67,6 +72,8 @@ public class GameApiClient implements GameApi {
             if ("POST".equalsIgnoreCase(method)) {
                 conn.setDoOutput(true);
             }
+            // log outgoing request
+            log.info("Making " + method + " request to: " + urlStr);
 
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {

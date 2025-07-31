@@ -22,12 +22,12 @@ public class AdventureApplication implements CommandLineRunner {
         SpringApplication.run(AdventureApplication.class, args);
     }
 
-	@Override
+    @Override
     public void run(String... args) {
         System.out.println("How many Dragon of Mugloar games do you want to start?");
 
         try (Scanner scanner = new Scanner(System.in)) {
-			if (scanner.hasNextInt()) {
+            if (scanner.hasNextInt()) {
                 int numberOfGames = scanner.nextInt();
 
                 GameApi gameApiClient = new GameApiClient();

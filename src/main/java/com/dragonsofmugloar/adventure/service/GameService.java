@@ -25,15 +25,28 @@ public class GameService {
 
         log.info("You have chosen to play " + numberOfGames + " games today!");
 
+        List<GameRunner> gameRunners = new ArrayList<>();
         int wonGames = 0;
         for (Game game : games) {
             GameRunner runner = new GameRunner(game, gameApiClient);
-            runner.play();
+            gameRunners.add(runner);
+        }
 
-            if (game.getScore() >= 1000) {
-                wonGames++;
+        for (GameRunner runner : gameRunners) {
+            runner.start();
+        }
+
+        for (GameRunner runner : gameRunners) {
+            try {
+                runner.join();
+                if (runner.getGame().getLives() > 0 && runner.getGame().getScore() >= 1000) {
+                    wonGames++;
+                }
+            } catch (InterruptedException e) {
+                log.error("Error waiting for game runner: " + e.getMessage());
             }
         }
+
 
         log.info("Total games won: " + wonGames + " out of " + games.size());
     }

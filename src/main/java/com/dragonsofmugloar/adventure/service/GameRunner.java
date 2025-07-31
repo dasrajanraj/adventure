@@ -10,9 +10,11 @@ import com.dragonsofmugloar.adventure.dto.TaskAttemptResponse;
 import com.dragonsofmugloar.adventure.dto.TaskResponse;
 import com.dragonsofmugloar.adventure.model.Game;
 
-public class GameRunner {
+public class GameRunner extends  Thread {
     
     private static final Logger log = LogManager.getLogger(GameRunner.class);
+
+    private int MAX_ATTEMPTS_ALLOWED = 100;
 
     private final Game game;
     private final GameApi gameApiClient;
@@ -26,9 +28,16 @@ public class GameRunner {
         this.itemBuyer = new ItemBuyer(client);
     }
 
-    public void play() {
+    public Game getGame() {
+        return game;
+    }
+
+    @Override
+    public void run() {
         log.info("Playing game: " + game.getGameId());
-        while (game.getLives() > 0 && game.getScore() < 1001) {
+        int attemptCount = 0;
+
+        while (game.getLives() > 0 && game.getScore() < 1001  && attemptCount < MAX_ATTEMPTS_ALLOWED) {
             try {
                 List<TaskResponse> tasks = gameApiClient.getTasks(game.getGameId());
                 TaskResponse task = taskSelector.selectTask(tasks);
@@ -40,7 +49,7 @@ public class GameRunner {
 
                 TaskAttemptResponse result = gameApiClient.attemptTask(game.getGameId(), task.getAdId());
 
-                log.debug("Task attempt result: " + (result.isSuccess() ? "Success" : "Failure") + 
+                log.info("Task attempt result: " + (result.isSuccess() ? "Success" : "Failure") + 
                     ", Score: " + result.getScore() + 
                     ", Lives left: " + result.getLives() + 
                     ", Gold: " + result.getGold() + 
@@ -56,6 +65,8 @@ public class GameRunner {
                 log.error("Error in game "+ game.getGameId() + ": " + e.getMessage());
                 break;
             }
+
+            attemptCount++;
         }
 
         log.info("Game " + game.getGameId() +" ended. Score: " + game.getScore() +", Lives: " + game.getLives());
