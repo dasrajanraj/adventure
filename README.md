@@ -29,6 +29,7 @@ A console-based adventure game simulator that plays multiple games of **Dragons 
 ./gradlew build
 ```
 
+`--args=` is the number of games you want to play
 ```bash
 ./gradlew bootRun --args='5'
 ```
